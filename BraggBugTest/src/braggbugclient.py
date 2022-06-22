@@ -10,7 +10,7 @@ while True:
         print("Write value:",pos.w_value)
         device.write_attribute('Position', [5.6, 7.8])
         print('Write_attribute [5.6, 7.8]')
-        sleep(0.1)
+        sleep(0.001)
     except KeyboardInterrupt:
         print("Exit")
         quit()

@@ -1,3 +1,4 @@
+from ast import Assert
 import sys
 import traceback
 from time import sleep
@@ -13,13 +14,14 @@ class BraggBugTest(tango.LatestDeviceImpl):
         tango.LatestDeviceImpl.__init__(self, cl, name)
 
         self.debug_stream("__init__ method")
+        self.runBackgroundWrite = True
         BraggBugTest.init_device(self)
 
     def backgroundWrite(self):
-        while True:
+        while self.runBackgroundWrite:
             self.get_device_attr().get_attr_by_name('Position').set_write_value([1.2, 3.4])
             self.debug_stream("Set_write_value [1.2, 3.4]")
-            sleep(0.1)
+            sleep(0.001)
  
 
     def init_device(self):
@@ -60,7 +62,14 @@ class BraggBugTest(tango.LatestDeviceImpl):
     def write_Position(self, attr):
         newPos = attr.get_write_value()
         self._Position = newPos
-        assert (newPos == [5.6, 7.8]).all(), "Not writting correct value"
+        try:
+            assert (newPos == [5.6, 7.8]).all(), "Not writting correct value"
+        except AssertionError:
+            self.debug_stream("newPos = {}".format(newPos))
+            self.runBackgroundWrite = False
+            raise
+
+        
 
 class BraggBugTestClass(tango.DeviceClass):
 
