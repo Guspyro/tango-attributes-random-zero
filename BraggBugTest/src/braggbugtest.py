@@ -5,6 +5,7 @@ from time import sleep
 from threading import Thread
 
 import tango
+from tango import AutoTangoMonitor
 
 class BraggBugTest(tango.LatestDeviceImpl):
 
@@ -18,11 +19,12 @@ class BraggBugTest(tango.LatestDeviceImpl):
         BraggBugTest.init_device(self)
 
     def backgroundWrite(self):
+        sleep(1.0) # Let the device server initialize correctly
         while self.runBackgroundWrite:
-            self.get_device_attr().get_attr_by_name('Position').set_write_value([1.2, 3.4])
+            with AutoTangoMonitor(self):
+                self.get_device_attr().get_attr_by_name('Position').set_write_value([1.2, 3.4])
             self.debug_stream("Set_write_value [1.2, 3.4]")
             sleep(0.001)
- 
 
     def init_device(self):
 
